@@ -16,7 +16,7 @@ Aos que terminarem no tempo estipulado no periódo da competição, receberão u
 - 🎫 Voucher gratuito para certificação.
 - 💡 Acesso ao Hackathon da Microsoft (para certificados).
 
-## 🛠️ Estrutura do Bootcamp
+## 🛠️ Estrutura do Bootcamp:
 
 📌 Atividades Principais:
 
