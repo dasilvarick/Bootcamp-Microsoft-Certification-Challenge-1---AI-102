@@ -41,7 +41,7 @@ Aos que terminarem no tempo estipulado no periódo da competição, receberão u
      - Desempenho em quizzes
      - Qualidade do código nos desafios
 
-## 📚 Ferramentas de Aprendizado
+## 📚 Ferramentas de Aprendizado:
 
 ### 🔧 Recursos Disponíveis:
 
