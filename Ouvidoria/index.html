@@ -8,7 +8,14 @@
 </head>
 <body>
     <div class="container">
-        <h1>Ouvidoria - Clube Aramacan</h1>
+        <header class="header">
+            <h1>Ouvidoria</h1>
+            <div class="social-icons">
+                <a href="#" class="icon facebook">f</a>
+                <a href="#" class="icon twitter">t</a>
+                <a href="#" class="icon linkedin">in</a>
+            </div>
+        </header>
 
         <div class="tabs">
             <button class="tab-btn active" onclick="openTab('enviar')">Nova Manifestação</button>
@@ -17,21 +24,114 @@
 
         <!-- Seção: Enviar Manifestação -->
         <div id="enviar" class="tab-content active">
-            <h2>Envie sua Manifestação</h2>
+            <p class="lembrete">
+                "Lembrete: Para requerimentos de Instauração de Sindicância devida Infração Disciplinar ocorrida dentro do C.A.A. o Representante deverá realizar a Solicitação por Carta escrita à mão e assinada, relatando data e situação presenciada e encaminhar o documento para a portaria principal no prazo de 10 dias do fato ocorrido para Direcionamento à Comissão de Sindicância." Artigo 20 do Código de Justiça e Disciplina.
+            </p>
+
+            <h2>Assessoria de aproximação entre o Associado e a Administração</h2>
+
             <form id="manifestationForm">
-                <div class="form-group">
-                    <label for="name">Nome Completo</label>
-                    <input type="text" id="name" name="name" required placeholder="Digite seu nome">
+
+                <div class="form-row radio-group">
+                    <label>Você é:</label>
+                    <label><input type="radio" name="tipo_pessoa" value="Associado" required> Associado</label>
+                    <label><input type="radio" name="tipo_pessoa" value="Funcionário"> Funcionário</label>
+                    <label><input type="radio" name="tipo_pessoa" value="Público Externo"> Público Externo</label>
+                    <label><input type="radio" name="tipo_pessoa" value="Poder Público"> Poder Público</label>
                 </div>
-                <div class="form-group">
-                    <label for="email">E-mail</label>
-                    <input type="email" id="email" name="email" required placeholder="Digite seu e-mail">
+
+                <div class="form-row radio-group">
+                    <label>É permitida a publicação do tema apresentado (pergunta e resposta) na opção F.A.Q. - Perguntas Frequentes caso exista interesse de outros integrantes?</label>
+                    <label><input type="radio" name="publicacao" value="Sim" required> Sim</label>
+                    <label><input type="radio" name="publicacao" value="Não"> Não</label>
                 </div>
+
                 <div class="form-group">
-                    <label for="message">Mensagem / Manifestação</label>
-                    <textarea id="message" name="message" rows="5" required placeholder="Descreva sua solicitação, reclamação ou sugestão..."></textarea>
+                    <label for="setor">A qual setor pertence sua Manifestação?</label>
+                    <select id="setor" name="setor" required>
+                        <option value="">- Escolha uma opção -</option>
+                        <option value="Administrativo">Administrativo</option>
+                        <option value="Financeiro">Financeiro</option>
+                        <option value="Manutenção">Manutenção</option>
+                        <option value="Esportes">Esportes</option>
+                        <option value="Outros">Outros</option>
+                    </select>
                 </div>
-                <button type="submit" class="btn">Enviar Manifestação</button>
+
+                <div class="form-group">
+                    <label>Data:</label>
+                    <input type="text" value="[Data atual automática]" disabled class="disabled-input">
+                </div>
+
+                <div class="form-group">
+                    <label for="name">Nome:</label>
+                    <input type="text" id="name" name="name" required placeholder="Nome">
+                </div>
+
+                <div class="form-group">
+                    <label for="matricula">Nº Matrícula Social:</label>
+                    <input type="text" id="matricula" name="matricula" placeholder="Matrícula">
+                </div>
+
+                <div class="form-group">
+                    <label for="endereco">Endereço:</label>
+                    <input type="text" id="endereco" name="endereco" placeholder="Endereço">
+                </div>
+
+                <div class="form-group">
+                    <label for="bairro">Bairro:</label>
+                    <input type="text" id="bairro" name="bairro" placeholder="Bairro">
+                </div>
+
+                <div class="form-group">
+                    <label for="cidade">Cidade:</label>
+                    <input type="text" id="cidade" name="cidade" placeholder="Cidade">
+                </div>
+
+                <div class="form-group">
+                    <label for="cep">CEP:</label>
+                    <input type="text" id="cep" name="cep" placeholder="CEP">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">1 - E-mail:</label>
+                    <input type="email" id="email" name="email" required placeholder="1 - E-mail">
+                </div>
+
+                <div class="form-group">
+                    <label for="telefone">Telefone:</label>
+                    <input type="text" id="telefone" name="telefone" placeholder="(00) 0000-0000">
+                </div>
+
+                <div class="form-group">
+                    <label for="celular">Celular:</label>
+                    <input type="text" id="celular" name="celular" placeholder="(00) 00000-0000">
+                </div>
+
+                <div class="form-group">
+                    <label for="email_secundario">2 - E-mail:</label>
+                    <input type="email" id="email_secundario" name="email_secundario" placeholder="2 - E-mail">
+                </div>
+
+                <div class="form-row radio-group">
+                    <label>É seu desejo para que a Ouvidoria mantenha sigilo sobre sua identidade?</label>
+                    <label><input type="radio" name="sigilo" value="Sim" required> Sim</label>
+                    <label><input type="radio" name="sigilo" value="Não"> Não</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="assunto">Assunto:</label>
+                    <input type="text" id="assunto" name="assunto" required placeholder="Assunto">
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Descrição sobre o assunto objeto da manifestação</label>
+                    <textarea id="message" name="message" rows="6" required></textarea>
+                </div>
+
+                <div class="submit-container">
+                    <button type="submit" class="btn-submit">Enviar</button>
+                </div>
             </form>
             <div id="formResult" class="result-message"></div>
         </div>

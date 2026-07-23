@@ -14,8 +14,21 @@ try {
     $pdo->exec("CREATE TABLE IF NOT EXISTS manifestations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         protocol TEXT UNIQUE,
+        tipo_pessoa TEXT,
+        publicacao TEXT,
+        setor TEXT,
         name TEXT,
+        matricula TEXT,
+        endereco TEXT,
+        bairro TEXT,
+        cidade TEXT,
+        cep TEXT,
         email TEXT,
+        telefone TEXT,
+        celular TEXT,
+        email_secundario TEXT,
+        sigilo TEXT,
+        assunto TEXT,
         message TEXT,
         status TEXT DEFAULT 'Aberto',
         createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -34,29 +47,36 @@ function generateProtocol() {
     return 'ARAM-' . date('Y') . '-' . rand(1000, 9999);
 }
 
-function sendEmail($protocol, $name, $email, $message) {
-    $to = 'ouvidoria@aramacan.com.br';
-    $subject = "Nova Manifestação de Ouvidoria: Protocolo $protocol";
-    $headers = "From: ouvidoria@aramacan.com.br\r\n";
-    $headers .= "Reply-To: $email\r\n";
-    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+function sendEmail($protocol, $data) {
+    // Sanitize email to prevent header injection (remove newlines)
+    $clean_email = str_replace(array("\r", "\n"), '', $data['email']);
 
-    $safeName = htmlspecialchars($name);
-    $safeEmail = htmlspecialchars($email);
+    $to = 'ouvidoria@aramacan.com.br';
+    $subject = "Nova Manifestação de Ouvidoria: Protocolo $protocol - " . htmlspecialchars($data['assunto']);
+    $headers = "From: ouvidoria@aramacan.com.br\r\n";
+    $headers .= "Reply-To: " . filter_var($clean_email, FILTER_SANITIZE_EMAIL) . "\r\n";
+    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
 
     $body = "
         <h2>Nova Manifestação Recebida</h2>
         <p><strong>Protocolo:</strong> $protocol</p>
-        <p><strong>Nome:</strong> $safeName</p>
-        <p><strong>E-mail:</strong> $safeEmail</p>
+        <p><strong>Você é:</strong> " . htmlspecialchars($data['tipo_pessoa']) . "</p>
+        <p><strong>Permite publicação (FAQ):</strong> " . htmlspecialchars($data['publicacao']) . "</p>
+        <p><strong>Setor:</strong> " . htmlspecialchars($data['setor']) . "</p>
+        <p><strong>Nome:</strong> " . htmlspecialchars($data['name']) . "</p>
+        <p><strong>Matrícula:</strong> " . htmlspecialchars($data['matricula']) . "</p>
+        <p><strong>Endereço:</strong> " . htmlspecialchars($data['endereco']) . ", <strong>Bairro:</strong> " . htmlspecialchars($data['bairro']) . ", <strong>Cidade:</strong> " . htmlspecialchars($data['cidade']) . " - <strong>CEP:</strong> " . htmlspecialchars($data['cep']) . "</p>
+        <p><strong>E-mail Principal:</strong> " . htmlspecialchars($data['email']) . "</p>
+        <p><strong>E-mail Secundário:</strong> " . htmlspecialchars($data['email_secundario']) . "</p>
+        <p><strong>Telefone:</strong> " . htmlspecialchars($data['telefone']) . " | <strong>Celular:</strong> " . htmlspecialchars($data['celular']) . "</p>
+        <p><strong>Deseja sigilo:</strong> " . htmlspecialchars($data['sigilo']) . "</p>
+        <p><strong>Assunto:</strong> " . htmlspecialchars($data['assunto']) . "</p>
         <p><strong>Mensagem:</strong></p>
-        <p>" . nl2br(htmlspecialchars($message)) . "</p>
+        <p>" . nl2br(htmlspecialchars($data['message'])) . "</p>
         <hr>
         <p>Esta é uma mensagem automática do Sistema de Ouvidoria.</p>
     ";
 
-    // No PHP a função mail depende de configurações do servidor (ex: sendmail).
-    // Como solicitado, a lógica se mantém via mail().
     @mail($to, $subject, $body, $headers);
 }
 
@@ -64,24 +84,46 @@ function sendEmail($protocol, $name, $email, $message) {
 if ($method === 'POST' && $action === 'create') {
     $data = json_decode(file_get_contents('php://input'), true);
 
+    $tipo_pessoa = $data['tipo_pessoa'] ?? '';
+    $publicacao = $data['publicacao'] ?? '';
+    $setor = $data['setor'] ?? '';
     $name = $data['name'] ?? '';
+    $matricula = $data['matricula'] ?? '';
+    $endereco = $data['endereco'] ?? '';
+    $bairro = $data['bairro'] ?? '';
+    $cidade = $data['cidade'] ?? '';
+    $cep = $data['cep'] ?? '';
     $email = $data['email'] ?? '';
+    $telefone = $data['telefone'] ?? '';
+    $celular = $data['celular'] ?? '';
+    $email_secundario = $data['email_secundario'] ?? '';
+    $sigilo = $data['sigilo'] ?? '';
+    $assunto = $data['assunto'] ?? '';
     $message = $data['message'] ?? '';
 
-    if (empty($name) || empty($email) || empty($message)) {
+    if (empty($name) || empty($email) || empty($message) || empty($assunto) || empty($setor)) {
         http_response_code(400);
-        echo json_encode(['error' => 'Todos os campos são obrigatórios.']);
+        echo json_encode(['error' => 'Campos obrigatórios estão faltando.']);
         exit;
     }
 
     $protocol = generateProtocol();
 
     try {
-        $stmt = $pdo->prepare("INSERT INTO manifestations (protocol, name, email, message) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$protocol, $name, $email, $message]);
+        $stmt = $pdo->prepare("
+            INSERT INTO manifestations (
+                protocol, tipo_pessoa, publicacao, setor, name, matricula, endereco, bairro, cidade, cep, email, telefone, celular, email_secundario, sigilo, assunto, message
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+
+        $stmt->execute([
+            $protocol, $tipo_pessoa, $publicacao, $setor, $name, $matricula,
+            $endereco, $bairro, $cidade, $cep, $email, $telefone, $celular,
+            $email_secundario, $sigilo, $assunto, $message
+        ]);
 
         // Dispara e-mail
-        sendEmail($protocol, $name, $email, $message);
+        sendEmail($protocol, $data);
 
         http_response_code(201);
         echo json_encode([

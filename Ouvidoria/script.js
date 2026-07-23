@@ -17,11 +17,35 @@ const API_BASE_URL = 'api.php';
 document.getElementById('manifestationForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    const message = document.getElementById('message').value;
+    const form = e.target;
+
+    // Helper to get checked radio value
+    const getRadioValue = (name) => {
+        const ele = document.querySelector(`input[name="${name}"]:checked`);
+        return ele ? ele.value : '';
+    };
+
+    const payload = {
+        tipo_pessoa: getRadioValue('tipo_pessoa'),
+        publicacao: getRadioValue('publicacao'),
+        setor: document.getElementById('setor').value,
+        name: document.getElementById('name').value,
+        matricula: document.getElementById('matricula').value,
+        endereco: document.getElementById('endereco').value,
+        bairro: document.getElementById('bairro').value,
+        cidade: document.getElementById('cidade').value,
+        cep: document.getElementById('cep').value,
+        email: document.getElementById('email').value,
+        telefone: document.getElementById('telefone').value,
+        celular: document.getElementById('celular').value,
+        email_secundario: document.getElementById('email_secundario').value,
+        sigilo: getRadioValue('sigilo'),
+        assunto: document.getElementById('assunto').value,
+        message: document.getElementById('message').value
+    };
+
     const resultDiv = document.getElementById('formResult');
-    const submitBtn = e.target.querySelector('button');
+    const submitBtn = form.querySelector('button[type="submit"]');
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Enviando...';
@@ -33,7 +57,7 @@ document.getElementById('manifestationForm').addEventListener('submit', async (e
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ name, email, message })
+            body: JSON.stringify(payload)
         });
 
         const data = await response.json();
@@ -72,22 +96,33 @@ document.getElementById('searchForm').addEventListener('submit', async (e) => {
         const data = await response.json();
 
         if (response.ok) {
-            const date = new Date(data.createdAt).toLocaleDateString('pt-BR', {
+            // Safari cross-browser date support (replace space with T)
+            const safeDateStr = data.createdAt.replace(' ', 'T');
+            const date = new Date(safeDateStr).toLocaleDateString('pt-BR', {
                 day: '2-digit', month: '2-digit', year: 'numeric',
                 hour: '2-digit', minute: '2-digit'
             });
 
-            // Prevent XSS
-            const safeProtocol = document.createTextNode(data.protocol).textContent;
-            const safeName = document.createTextNode(data.name).textContent;
-            const safeStatus = document.createTextNode(data.status).textContent;
+            // Prevent XSS robustly by creating DOM elements directly
+            resultBox.innerHTML = '';
 
-            resultBox.innerHTML = `
-                <p><strong>Protocolo:</strong> ${safeProtocol}</p>
-                <p><strong>Nome:</strong> ${safeName}</p>
-                <p><strong>Data:</strong> ${date}</p>
-                <p><strong>Status:</strong> <span class="status-badge">${safeStatus}</span></p>
-            `;
+            const protocolP = document.createElement('p');
+            protocolP.innerHTML = `<strong>Protocolo:</strong> ${document.createTextNode(data.protocol).textContent}`;
+
+            const nameP = document.createElement('p');
+            nameP.innerHTML = `<strong>Nome:</strong> ${document.createTextNode(data.name).textContent}`;
+
+            const dateP = document.createElement('p');
+            dateP.innerHTML = `<strong>Data:</strong> ${date}`;
+
+            const statusP = document.createElement('p');
+            statusP.innerHTML = `<strong>Status:</strong> <span class="status-badge">${document.createTextNode(data.status).textContent}</span>`;
+
+            resultBox.appendChild(protocolP);
+            resultBox.appendChild(nameP);
+            resultBox.appendChild(dateP);
+            resultBox.appendChild(statusP);
+
             resultBox.classList.remove('hidden');
         } else {
             resultBox.innerHTML = `<p style="color: red;">${data.error || 'Protocolo não encontrado.'}</p>`;
